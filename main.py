@@ -562,51 +562,96 @@ async def upload(bot: Client, m: Message):
 
     
 
-    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
-    input6 = message = await bot.listen(editable.chat.id)
-    raw_text6 = input6.text
-    await input6.delete(True)
-    await editable.delete()
+ await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
+input6 = message = await bot.listen(editable.chat.id)
+raw_text6 = input6.text
+await input6.delete(True)
+await editable.delete()
 
+thumb = "no"
+failed_count = 0
 
-    #thumb = input6.text
-    #if thumb.startswith("http://") or thumb.startswith("https://"):
-    #    getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
-    #    thumb = "thumb.jpg"
+if len(links) == 1:
+    count = 1
+else:
+    count = 0
 
-    thumb = "no"
-    failed_count = 0
+try:
+    for i in range(count - 1, len(links)):
+        V = links[i][1]
+        V = V.replace("file/d/", "uc?export=download&id=")
+        V = V.replace("www.youtube-nocookie.com/embed", "")
+        V = V.replace("youtu.be", "")
+        V = V.replace("?modestbranding=1", "")
+        V = V.replace("/view?usp=sharing", "")
+        # V = V.replace("mpd", "m3u8")  # optional
 
-    if len(links) == 1:
-        count = 1
-    else:
-        count = 0
+        url = "https://" + V
 
-    try:
-        for i in range(count - 1, len(links)):
-            V = links[i][1].replace("file/d/","uc?export=download&id=").replace("www.youtube-nocookie.com/embed", "youtu.be").replace("?modestbranding=1", "").replace("/view?usp=sharing","") # .replace("mpd","m3u8")
-            url = "https://" + V
+        if "visionias" in url:
+            async with ClientSession() as session:
+                async with session.get(
+                    url,
+                    headers={
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        'Pragma': 'no-cache',
+                        'Referer': 'http://www.visionias.in/',
+                        'Sec-Fetch-Dest': 'iframe',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'cross-site',
+                        'Upgrade-Insecure-Requests': '1',
+                        'User-Agent': 'Mozilla/5.0 (Linux; Android 12; RMX2121) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36',
+                        'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"',
+                        'sec-ch-ua-mobile': '?1',
+                        'sec-ch-ua-platform': '"Android"',
+                    },
+                ) as resp:
+                    text = await resp.text()
+                    url = re.search(r"(https://.*?playlist.m3u8.*?)\"", text).group(1)
 
-            if "visionias" in url:
-                async with ClientSession() as session:
-                    async with session.get(url, headers={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9', 'Accept-Language': 'en-US,en;q=0.9', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Referer': 'http://www.visionias.in/', 'Sec-Fetch-Dest': 'iframe', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Site': 'cross-site', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Linux; Android 12; RMX2121) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36', 'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"', 'sec-ch-ua-mobile': '?1', 'sec-ch-ua-platform': '"Android"',}) as resp:
-                        text = await resp.text()
-                        url = re.search(r"(https://.*?playlist.m3u8.*?)\"", text).group(1)
-                        
-            elif 'media-cdn.classplusapp.com/drm/' in url:
-                url = f"https://dragoapi.vercel.app/video/{url}"
+        elif "media-cdn.classplusapp.com/drm/" in url:
+            url = f"https://dragoapi.vercel.app/video/{url}"
 
-            elif 'videos.classplusapp' in url:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-             url = requests.get(f'https://api.classplusapp.com/cams/uploader/video/jw-signed-url?url={url}', headers={'x-access-token': 'eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9'}).json()['url']                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-            elif "tencdn.classplusapp" in url or "media-cdn-alisg.classplusapp.com" in url or "videos.classplusapp" in url or "media-cdn.classplusapp" in url:
-             headers = {'Host': 'api.classplusapp.com', 'x-access-token': 'eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9', 'user-agent': 'Mobile-Android', 'app-version': '1.4.37.1', 'api-version': '18', 'device-id': '5d0d17ac8b3c9f51', 'device-details': '2848b866799971ca_2848b8667a33216c_SDK-30', 'accept-encoding': 'gzip'}
-             params = (('url', f'{url}'),)
-             response = requests.get('https://api.classplusapp.com/cams/uploader/video/jw-signed-url', headers=headers, params=params)
-             url = response.json()['url']
+        elif "videos.classplusapp" in url:
+            url = requests.get(
+                f'https://api.classplusapp.com/cams/uploader/video/jw-signed-url?url={url}',
+                headers={
+                    'x-access-token': 'eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9'
+                },
+            ).json()['url']
 
-            elif "https://appx-transcoded-videos.livelearn.in/videos/rozgar-data/" in url:
-                url = url.replace("https://appx-transcoded-videos.livelearn.in/videos/rozgar-data/", "")
+        elif (
+            "tencdn.classplusapp" in url
+            or "media-cdn-alisg.classplusapp.com" in url
+            or "videos.classplusapp" in url
+            or "media-cdn.classplusapp" in url
+        ):
+            headers = {
+                'Host': 'api.classplusapp.com',
+                'x-access-token': 'eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9',
+                'user-agent': 'Mobile-Android',
+                'app-version': '1.4.37.1',
+                'api-version': '18',
+                'device-id': '5d0d17ac8b3c9f51',
+                'device-details': '2848b866799971ca_2848b8667a33216c_SDK-30',
+                'accept-encoding': 'gzip',
+            }
+            params = (('url', f'{url}'),)
+            response = requests.get(
+                'https://api.classplusapp.com/cams/uploader/video/jw-signed-url',
+                headers=headers,
+                params=params,
+            )
+            url = response.json()['url']
+
+        elif "https://appx-transcoded-videos.livelearn.in/videos/rozgar-data/" in url:
+            url = url.replace("https://appx-transcoded-videos.livelearn.in/videos/rozgar-data/", "")
+
+except Exception as e:
+    print(f"Error occurred: {e}")
                 name1 = links[i][0].replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "@").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
                 name = f'{str(count).zfill(3)}) {name1[:60]}'
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
